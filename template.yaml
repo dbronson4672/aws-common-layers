@@ -1,0 +1,180 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  SAM template for AWS Common Layers used by multiple projects
+  Includes:
+    - PowerShell runtime and AWS.Tools layers
+    - Java runtime layer
+    - Nconvert binary layer
+    - EPPlus library layer
+    - Adobe PDF library layer
+    - Ghostscript library layer
+    - CV2 Python library layer
+    - Pillow Python library layer
+
+Resources:
+
+  ##########################################################################
+  #  Lambda layers                                                         #
+  ##########################################################################
+
+  PwshRuntimeLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Lambda Layer containing PowerShell
+      ContentUri: layers/powershell-runtime/source
+      CompatibleRuntimes:
+        - provided.al2023
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+  PwshAWSToolsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Layer containing PWSH AWS.Tools.*
+      ContentUri: layers/AWSToolsforPowerShell/AWS.Tools.Serverless/buildlayer
+      CompatibleRuntimes:
+        - provided.al2023
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+  JavaRuntimeLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Lambda Layer containing Java 1.8 JRE
+      ContentUri: layers/java-runtime/source
+      CompatibleRuntimes:
+        - python3.13
+        - provided.al2023
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+  NconvertLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Lambda Layer containing the nconvert binary
+      ContentUri: layers/nconvert/source
+      CompatibleRuntimes:
+        - python3.13
+        - provided.al2023
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+  EPPlusLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Lambda Layer containing EPPlus
+      ContentUri: layers/EPPlus/source
+      CompatibleRuntimes:
+        - provided.al2023
+        - dotnet9
+        - dotnet8
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+  AdobePythonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Python Lambda Layer containing Adobe Libraries
+      ContentUri: layers/adobe-python-lib/source
+      CompatibleRuntimes:
+        - python3.13
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+  GhostscriptLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Python Lambda Layer containing Ghostscript Libraries
+      ContentUri: layers/ghostscript/source
+      CompatibleRuntimes:
+        - provided.al2023
+        - python3.13
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+  CV2PythonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Python Lambda Layer containing CV2 Python Libraries
+      ContentUri: layers/cv2-python-lib/source
+      CompatibleRuntimes:
+        - python3.13
+        - provided.al2023
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+  PillowPythonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Python Lambda Layer containing Pillow Python Libraries
+      ContentUri: layers/pil-python-lib/source
+      CompatibleRuntimes:
+        - python3.13
+        - provided.al2023
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: makefile
+
+Outputs:
+  PwshRuntimeLayerArn:
+    Description: Versioned ARN for PowerShell runtime layer
+    Value: !Ref PwshRuntimeLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-PwshRuntimeLayerArn"
+
+  PwshAWSToolsLayerArn:
+    Description: Versioned ARN for PowerShell AWS.Tools layer
+    Value: !Ref PwshAWSToolsLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-PwshAWSToolsLayerArn"
+
+  JavaRuntimeLayerArn:
+    Description: Versioned ARN for Java runtime layer
+    Value: !Ref JavaRuntimeLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-JavaRuntimeLayerArn"
+
+  NconvertLayerArn:
+    Description: Versioned ARN for Nconvert binary layer
+    Value: !Ref NconvertLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-NconvertLayerArn"
+
+  EPPlusLayerArn:
+    Description: Versioned ARN for EPPlus layer
+    Value: !Ref EPPlusLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-EPPlusLayerArn"
+
+  AdobePythonLayerArn:
+    Description: Versioned ARN for Adobe Python libraries layer
+    Value: !Ref AdobePythonLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-AdobePythonLayerArn"
+
+  GhostscriptLayerArn:
+    Description: Versioned ARN for Ghostscript libraries layer
+    Value: !Ref GhostscriptLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-GhostscriptLayerArn"
+
+  CV2PythonLayerArn:
+    Description: Versioned ARN for CV2 Python libraries layer
+    Value: !Ref CV2PythonLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-CV2PythonLayerArn"
+
+  PillowPythonLayerArn:
+    Description: Versioned ARN for Pillow Python libraries layer
+    Value: !Ref PillowPythonLayer
+    Export:
+      Name: !Sub "${AWS::StackName}-PillowPythonLayerArn"

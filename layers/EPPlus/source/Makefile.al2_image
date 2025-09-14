@@ -1,0 +1,29 @@
+build-EPPlusLayer:
+# Download and extract PowerShell binaries. Remove downloaded file
+
+	yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+	rpm --import http://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
+	yum -y install mono-complete
+
+	# dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+	# rpm --import http://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+	# dnf -y install mono-complete
+
+	curl --silent -o /usr/local/bin/nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+	#ls -lart /usr/local/bin/nuget.exe 	
+	chmod +x /usr/local/bin/nuget.exe
+
+	#ls -lart /usr/local/bin/nuget.exe
+	
+	mkdir $(ARTIFACTS_DIR)/EPPlus
+	mono /usr/local/bin/nuget.exe install EPPlus -OutputDirectory $(ARTIFACTS_DIR)/EPPlus
+
+	rm -rf $(ARTIFACTS_DIR)/EPPlus/EPPlus.*/lib/net462
+	rm -rf $(ARTIFACTS_DIR)/EPPlus/EPPlus.*/lib/net6*
+	rm -rf $(ARTIFACTS_DIR)/EPPlus/EPPlus.*/lib/net7*
+	rm -rf $(ARTIFACTS_DIR)/EPPlus/EPPlus.*/lib/net8*
+	rm -rf $(ARTIFACTS_DIR)/EPPlus/EPPlus.*/lib/net9*
+	rm -rf $(ARTIFACTS_DIR)/EPPlus/EPPlus.*/lib/netstandard*
+	rm -rf $(ARTIFACTS_DIR)/EPPlus/Microsoft.IO.*
+	rm -rf $(ARTIFACTS_DIR)/EPPlus/System.*
+	#ls -alrt $(ARTIFACTS_DIR)/EPPlus
