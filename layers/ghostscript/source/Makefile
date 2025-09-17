@@ -1,6 +1,6 @@
 V = 1
-GS_TAG ?= gs10051
-GS_VERSION ?= 10.05.1
+GS_TAG ?= gs10060
+GS_VERSION ?= 10.06.0
 
 build-GhostscriptLayer:
 	# Download and extract PowerShell binaries. Remove downloaded file

@@ -1,0 +1,178 @@
+name: Automated SAM Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY_PREFIX: my-app
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      should-deploy: ${{ steps.changes.outputs.should-deploy }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    
+    - name: Install validation tools
+      run: |
+        pip install cfn-lint aws-sam-cli
+        
+    - name: Validate SAM Template
+      run: |
+        sam validate --template template.yaml
+        cfn-lint template.yaml
+        
+    - name: Check for changes requiring deployment
+      id: changes
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          echo "should-deploy=true" >> $GITHUB_OUTPUT
+        else
+          echo "should-deploy=false" >> $GITHUB_OUTPUT
+        fi
+
+  build-containers:
+    needs: validate
+    if: needs.validate.outputs.should-deploy == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        container: [api-service, data-processor, auth-handler]
+    outputs:
+      api-service-uri: ${{ steps.build-api-service.outputs.image-uri }}
+      data-processor-uri: ${{ steps.build-data-processor.outputs.image-uri }}
+      auth-handler-uri: ${{ steps.build-auth-handler.outputs.image-uri }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    
+    - name: Create ECR repositories if they don't exist
+      run: |
+        for container in api-service data-processor auth-handler; do
+          aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY_PREFIX }}-$container || \
+          aws ecr create-repository --repository-name ${{ env.ECR_REPOSITORY_PREFIX }}-$container --image-scanning-configuration scanOnPush=true
+        done
+    
+    - name: Build and push container images
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        for container in api-service data-processor auth-handler; do
+          # Build image
+          docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY_PREFIX }}-$container:$IMAGE_TAG containers/$container/
+          docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY_PREFIX }}-$container:latest containers/$container/
+          
+          # Push image
+          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY_PREFIX }}-$container:$IMAGE_TAG
+          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY_PREFIX }}-$container:latest
+          
+          # Output image URI for SAM deployment
+          echo "${container/-/}-uri=$ECR_REGISTRY/${{ env.ECR_REPOSITORY_PREFIX }}-$container:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        done
+
+  deploy-staging:
+    needs: [validate, build-containers]
+    if: needs.validate.outputs.should-deploy == 'true' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python and SAM
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    - run: pip install aws-sam-cli
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: SAM Build
+      run: sam build
+    
+    - name: Deploy to Staging
+      run: |
+        sam deploy \
+          --config-env staging \
+          --no-confirm-changeset \
+          --no-fail-on-empty-changeset \
+          --parameter-overrides \
+            ApiServiceImageUri="${{ needs.build-containers.outputs.api-service-uri }}" \
+            DataProcessorImageUri="${{ needs.build-containers.outputs.data-processor-uri }}" \
+            AuthHandlerImageUri="${{ needs.build-containers.outputs.auth-handler-uri }}" \
+            Environment="staging"
+
+  deploy-production:
+    needs: [validate, build-containers]
+    if: needs.validate.outputs.should-deploy == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python and SAM
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    - run: pip install aws-sam-cli
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: SAM Build
+      run: sam build
+    
+    - name: Deploy to Production
+      run: |
+        sam deploy \
+          --config-env production \
+          --no-confirm-changeset \
+          --no-fail-on-empty-changeset \
+          --parameter-overrides \
+            ApiServiceImageUri="${{ needs.build-containers.outputs.api-service-uri }}" \
+            DataProcessorImageUri="${{ needs.build-containers.outputs.data-processor-uri }}" \
+            AuthHandlerImageUri="${{ needs.build-containers.outputs.auth-handler-uri }}" \
+            Environment="production"
+
+  notify:
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notify deployment status
+      run: |
+        if [[ "${{ needs.deploy-staging.result }}" == "success" ]] || [[ "${{ needs.deploy-production.result }}" == "success" ]]; then
+          echo "✅ Deployment successful"
+        else
+          echo "❌ Deployment failed"
+          exit 1
+        fi

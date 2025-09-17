@@ -1,6 +1,6 @@
 # PWSH_VERSION is version of PowerShell to download
 # NOTE VERSION 7.5 moves to .NET 9.0
-PWSH_VERSION ?= 7.4.11
+PWSH_VERSION ?= 7.5.3
 # PWSH_ARCHITECTURE can be 'x64' or 'arm64'
 PWSH_ARCHITECTURE ?= x64
 build-PwshRuntimeLayer:
