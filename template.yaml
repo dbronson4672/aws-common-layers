@@ -71,8 +71,6 @@ Resources:
       ContentUri: layers/EPPlus/source
       CompatibleRuntimes:
         - provided.al2023
-        - dotnet9
-        - dotnet8
       RetentionPolicy: Delete
     Metadata:
       BuildMethod: makefile
