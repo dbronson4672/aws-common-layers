@@ -9,6 +9,7 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  SAM_CLI_TELEMETRY: 0
   ECR_REPOSITORY_PREFIX: my-app
 
 jobs:
