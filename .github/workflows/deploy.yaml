@@ -9,6 +9,8 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   SAM_CLI_TELEMETRY: 0
   ECR_REPOSITORY_PREFIX: my-app
 
@@ -79,6 +81,10 @@ jobs:
     - name: SAM Deploy
       env:
         DEPLOY_ENV: ${{ env.DEPLOY_ENV }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ env.AWS_REGION }}
+        AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}
       run: |
         echo "Deploying with config env: $DEPLOY_ENV"
         sam deploy \
