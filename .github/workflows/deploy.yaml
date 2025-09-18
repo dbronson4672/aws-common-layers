@@ -37,6 +37,13 @@ jobs:
         sam validate --template template.yaml --region "$AWS_DEFAULT_REGION"
         cfn-lint template.yaml
         
+    - name: Build Lambda Layers
+      env:
+        AWS_REGION: ${{ env.AWS_REGION }}
+        AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}
+      run: |
+        sam build --template template.yaml --use-container --parallel
+        
     - name: Check for changes requiring deployment
       id: changes
       run: |
@@ -117,8 +124,8 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
     
-    - name: SAM Build
-      run: sam build
+    - name: SAM Build Layers
+      run: sam build --template template.yaml --use-container --parallel
     
     - name: Deploy to Staging
       run: |
@@ -153,8 +160,8 @@ jobs:
         aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
     
-    - name: SAM Build
-      run: sam build
+    - name: SAM Build Layers
+      run: sam build --template template.yaml --use-container --parallel
     
     - name: Deploy to Production
       run: |
