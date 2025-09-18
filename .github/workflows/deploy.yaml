@@ -92,7 +92,6 @@ jobs:
           --stack-name "aws-common-layers-$DEPLOY_ENV" \
           --region "$AWS_DEFAULT_REGION" \
           --resolve-s3 \
-          --capabilities CAPABILITY_IAM \          
           --no-confirm-changeset \
           --no-fail-on-empty-changeset
 
