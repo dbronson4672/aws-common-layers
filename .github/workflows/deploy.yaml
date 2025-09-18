@@ -89,6 +89,7 @@ jobs:
         echo "Deploying with config env: $DEPLOY_ENV"
         sam deploy \
           --config-env "$DEPLOY_ENV" \
+          --stack-name "aws-common-layers-$DEPLOY_ENV" \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset
 
