@@ -7,7 +7,8 @@ on:
     branches: [ main ]
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   ECR_REPOSITORY_PREFIX: my-app
 
 jobs:
@@ -28,8 +29,11 @@ jobs:
         pip install cfn-lint aws-sam-cli
         
     - name: Validate SAM Template
+      env:
+        AWS_REGION: ${{ env.AWS_REGION }}
+        AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}
       run: |
-        sam validate --template template.yaml
+        sam validate --template template.yaml --region "$AWS_DEFAULT_REGION"
         cfn-lint template.yaml
         
     - name: Check for changes requiring deployment
