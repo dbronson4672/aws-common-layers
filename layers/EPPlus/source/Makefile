@@ -27,11 +27,14 @@ build-EPPlusLayer:
 
 	# Copying Dll's to the artifacts directory
 	# ----------------------------------------
-	
+
+	find /root/.nuget/packages/epplus* -ls
+	find /root/.nuget/packages/microsoft.* -ls
+
 	cp  /root/.nuget/packages/epplus*/$(EPPLUS_VERSION)/lib/$(NET_VERSION)/*.dll $(ARTIFACTS_DIR)/EPPlus
 	cp  /root/.nuget/packages/epplus*/$(EPPLUS_INTERFACES_VERSION)/lib/$(NET_VERSION)/*.dll $(ARTIFACTS_DIR)/EPPlus
-	cp  /root/.nuget/packages/microsoft.extensions.*/*/lib/$(NET_VERSION)/*.dll $(ARTIFACTS_DIR)/EPPlus
-	cp  /root/.nuget/packages/microsoft.io.recyclablememorystream/*/lib/netstandard2.1/*.dll $(ARTIFACTS_DIR)/EPPlus
+# 	cp  /root/.nuget/packages/microsoft.extensions.*/*/lib/$(NET_VERSION)/*.dll $(ARTIFACTS_DIR)/EPPlus
+# 	cp  /root/.nuget/packages/microsoft.io.recyclablememorystream/*/lib/netstandard2.1/*.dll $(ARTIFACTS_DIR)/EPPlus
 	find $(ARTIFACTS_DIR)/EPPlus -ls 
 
 	ls -ld $(ARTIFACTS_DIR)/EPPlus/*
