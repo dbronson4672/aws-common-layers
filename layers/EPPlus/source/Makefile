@@ -1,6 +1,6 @@
-EPPLUS_VERSION ?= 7.7.2
-EPPLUS_INTERFACES_VERSION ?= 7.7.0
-NET_VERSION ?= net8.0
+EPPLUS_VERSION ?= 8.2.0
+EPPLUS_INTERFACES_VERSION ?= 8.1.0
+NET_VERSION ?= net9.0
 
 build-EPPlusLayer:
 	# Download and extract PowerShell binaries. Remove downloaded file

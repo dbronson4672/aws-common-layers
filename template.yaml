@@ -122,6 +122,82 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
+  ##########################################################################
+  #  SSM parameters                                                        #
+  ##########################################################################
+
+  PwshRuntimeLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/pwsh-runtime/arn
+      Description: Versioned ARN for PowerShell runtime layer
+      Type: String
+      Value: !Ref PwshRuntimeLayer
+
+  PwshAWSToolsLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/pwsh-aws-tools/arn
+      Description: Versioned ARN for PowerShell AWS.Tools layer
+      Type: String
+      Value: !Ref PwshAWSToolsLayer
+
+  JavaRuntimeLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/java-runtime/arn
+      Description: Versioned ARN for Java runtime layer
+      Type: String
+      Value: !Ref JavaRuntimeLayer
+
+  NconvertLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/nconvert/arn
+      Description: Versioned ARN for Nconvert binary layer
+      Type: String
+      Value: !Ref NconvertLayer
+
+  EPPlusLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/epplus/arn
+      Description: Versioned ARN for EPPlus layer
+      Type: String
+      Value: !Ref EPPlusLayer
+
+  AdobePythonLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/adobe-python/arn
+      Description: Versioned ARN for Adobe Python libraries layer
+      Type: String
+      Value: !Ref AdobePythonLayer
+
+  GhostscriptLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/ghostscript/arn
+      Description: Versioned ARN for Ghostscript libraries layer
+      Type: String
+      Value: !Ref GhostscriptLayer
+
+  CV2PythonLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/cv2-python/arn
+      Description: Versioned ARN for CV2 Python libraries layer
+      Type: String
+      Value: !Ref CV2PythonLayer
+
+  PillowPythonLayerArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /layers/shared/pillow-python/arn
+      Description: Versioned ARN for Pillow Python libraries layer
+      Type: String
+      Value: !Ref PillowPythonLayer
+
 Outputs:
   PwshRuntimeLayerArn:
     Description: Versioned ARN for PowerShell runtime layer
